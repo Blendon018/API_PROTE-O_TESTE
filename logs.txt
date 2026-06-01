@@ -1,0 +1,17 @@
+[30/05/2026 17:33:31] IP: 127.0.0.1 - tentativa de login
+[30/05/2026 17:33:31] IP: 127.0.0.1 - login bem sucedido
+[30/05/2026 18:03:36] IP: 127.0.0.1 - tentativa de login
+[30/05/2026 18:03:36] IP: 127.0.0.1 - login bem sucedido
+[30/05/2026 20:02:21] IP: 127.0.0.1 - tentativa de login
+[30/05/2026 20:02:21] IP: 127.0.0.1 - login bem sucedido
+[30/05/2026 20:02:40] IP: 127.0.0.1 - logout realizado
+[30/05/2026 20:02:51] IP: 127.0.0.1 - tentativa de login
+[30/05/2026 20:02:52] IP: 127.0.0.1 - login bem sucedido
+[31/05/2026 00:49:36] IP: 127.0.0.1 - tentativa de login
+[31/05/2026 00:49:36] IP: 127.0.0.1 - login invalido
+[31/05/2026 00:50:26] IP: 127.0.0.1 - tentativa de login
+[31/05/2026 00:50:26] IP: 127.0.0.1 - login bem sucedido
+[31/05/2026 00:52:03] IP: 127.0.0.1 - tentativa de login
+[31/05/2026 00:52:03] IP: 127.0.0.1 - login bem sucedido
+[31/05/2026 12:41:09] IP: 127.0.0.1 - tentativa de login
+[31/05/2026 12:41:09] IP: 127.0.0.1 - login bem sucedido

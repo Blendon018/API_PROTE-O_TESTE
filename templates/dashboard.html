@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f172a; color: #e2e8f0; font-family: Arial, sans-serif; min-height: 100vh; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .header-left { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 500; color: #00ffc3; }
+        .header-left i { font-size: 20px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .badge-active { background: rgba(0,200,100,0.15); color: #00e090; font-size: 12px; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(0,200,100,0.25); display: flex; align-items: center; gap: 6px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #00e090; }
+        .logout-btn { background: transparent; border: 1px solid rgba(255,80,80,0.3); border-radius: 8px; padding: 7px 16px; font-size: 13px; color: #ff8080; cursor: pointer; display: flex; align-items: center; gap: 6px; text-decoration: none; transition: 0.2s; }
+        .logout-btn:hover { background: rgba(255,80,80,0.1); }
+
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 22px 28px 0; }
+        .metric { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 18px; }
+        .metric-label { font-size: 12px; color: #94a3b8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .metric-label i { font-size: 15px; }
+        .metric-value { font-size: 26px; font-weight: 600; color: #e2e8f0; }
+        .metric-value.danger { color: #ff6b6b; }
+        .metric-value.success { color: #00e090; }
+        .metric-sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 18px 28px 28px; }
+        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 22px; }
+        .full-width { grid-column: 1 / -1; }
+        .card-title { font-size: 13px; color: #94a3b8; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+        .card-title i { font-size: 16px; }
+
+        .token-box { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 11px; color: #00e5ff; word-break: break-all; line-height: 1.7; max-height: 72px; overflow: hidden; position: relative; }
+        .token-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 28px; background: linear-gradient(transparent, rgba(0,0,0,0.3)); }
+
+        .attempts-list { display: flex; flex-direction: column; gap: 10px; }
+        .attempt-row { display: flex; align-items: center; gap: 10px; }
+        .attempt-ip { font-family: monospace; font-size: 12px; color: #94a3b8; min-width: 105px; }
+        .attempt-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+        .attempt-bar { height: 100%; border-radius: 99px; }
+        .attempt-count { font-size: 13px; font-weight: 500; color: #e2e8f0; min-width: 16px; text-align: right; }
+
+        .log-box { font-family: monospace; font-size: 11px; line-height: 1.9; max-height: 180px; overflow-y: auto; }
+        .log-line { display: flex; gap: 10px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .log-line:last-child { border-bottom: none; }
+        .log-time { color: #475569; min-width: 135px; }
+        .log-ip { color: #38bdf8; min-width: 95px; }
+        .log-event { color: #cbd5e1; }
+        .log-event.success { color: #00e090; }
+        .log-event.danger { color: #ff6b6b; }
+        .log-event.warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <i class="ti ti-shield-lock"></i>
+        Security Dashboard
+    </div>
+    <div class="header-right">
+        <div class="badge-active"><div class="dot"></div>Firewall ativo</div>
+        <a href="/logout" class="logout-btn">
+            <i class="ti ti-logout"></i> Sair
+        </a>
+    </div>
+</div>
+
+<div class="metrics">
+    <div class="metric">
+        <div class="metric-label"><i class="ti ti-device-desktop"></i> IPs monitorados</div>
+        <div class="metric-value" id="m-ips">—</div>
+        <div class="metric-sub">na sessão atual</div>
+    </div>
+    <div class="metric">
+        <div class="metric-label"><i class="ti ti-ban"></i> IPs bloqueados</div>
+        <div class="metric-value danger" id="m-blocked">{{ total_bloqueados }}</div>
+        <div class="metric-sub">pelo firewall</div>
+    </div>
+    <div class="metric">
+        <div class="metric-label"><i class="ti ti-login"></i> Tentativas totais</div>
+        <div class="metric-value" id="m-attempts">—</div>
+        <div class="metric-sub">nesta sessão</div>
+    </div>
+    <div class="metric">
+        <div class="metric-label"><i class="ti ti-key"></i> Token JWT</div>
+        <div class="metric-value success">Ativo</div>
+        <div class="metric-sub">autenticado</div>
+    </div>
+</div>
+
+<div class="grid">
+
+    <div class="card">
+        <div class="card-title"><i class="ti ti-fingerprint"></i> JWT Token</div>
+        <div class="token-box">
+            {{ token }}
+            <div class="token-fade"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar"></i> Tentativas por IP</div>
+        <div class="attempts-list" id="attempts-list"></div>
+    </div>
+
+    <div class="card full-width">
+        <div class="card-title"><i class="ti ti-terminal"></i> Logs do sistema</div>
+        <div class="log-box" id="log-box"></div>
+    </div>
+
+</div>
+
+<script>
+    const tentativasRaw = `{{ tentativas }}`;
+
+    try {
+        const tentativas = JSON.parse(tentativasRaw.replace(/'/g, '"'));
+        const ips = Object.keys(tentativas);
+        const max = Math.max(...Object.values(tentativas), 1);
+        const total = Object.values(tentativas).reduce((a, b) => a + b, 0);
+        document.getElementById('m-attempts').textContent = total;
+        document.getElementById('m-ips').textContent = ips.length;
+        const list = document.getElementById('attempts-list');
+        list.innerHTML = ips.map(ip => {
+            const count = tentativas[ip];
+            const pct = Math.round((count / max) * 100);
+            const color = count >= 5 ? '#ff6b6b' : count >= 3 ? '#fbbf24' : '#38bdf8';
+            return `<div class="attempt-row">
+                <span class="attempt-ip">${ip}</span>
+                <div class="attempt-bar-bg"><div class="attempt-bar" style="width:${pct}%;background:${color}"></div></div>
+                <span class="attempt-count">${count}</span>
+            </div>`;
+        }).join('');
+    } catch(e) {}
+
+    function renderLogs(logsRaw) {
+        const lines = logsRaw.trim().split('\n').filter(Boolean).reverse().slice(0, 30);
+        document.getElementById('log-box').innerHTML = lines.map(line => {
+            const m = line.match(/\[(.+?)\] IP: ([\d\.]+) - (.+)/);
+            if (!m) return `<div class="log-line"><span class="log-event">${line}</span></div>`;
+            let cls = '';
+            if (m[3].includes('bem sucedido')) cls = 'success';
+            else if (m[3].includes('bloqueado')) cls = 'danger';
+            else if (m[3].includes('invalido')) cls = 'warning';
+            return `<div class="log-line">
+                <span class="log-time">${m[1]}</span>
+                <span class="log-ip">${m[2]}</span>
+                <span class="log-event ${cls}">${m[3]}</span>
+            </div>`;
+        }).join('');
+    }
+
+    renderLogs(`{{ logs }}`);
+
+    function atualizarLogs() {
+        fetch('/api/logs')
+            .then(r => r.text())
+            .then(logsRaw => renderLogs(logsRaw))
+            .catch(() => {});
+    }
+
+    setInterval(atualizarLogs, 5000);
+</script>
+
+</body>
+</html>
